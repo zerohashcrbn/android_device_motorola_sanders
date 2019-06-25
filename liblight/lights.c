@@ -32,15 +32,16 @@
 
 /******************************************************************************/
 
-#define LED_LIGHT_OFF          0
-#define LED_LIGHT_BLINK_FAST   1
-#define LED_LIGHT_BLINK_SLOW   2
-#define LED_LIGHT_SOLID_ON     3
+#define LED_LIGHT_OFF 0
+#define LED_LIGHT_ON 10
 
 static pthread_once_t g_init = PTHREAD_ONCE_INIT;
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 
-char const*const LED_FILE
+static struct light_state_t g_battery;
+static struct light_state_t g_notification;
+
+char const*const CHARGING_LED_FILE
         = "/sys/class/leds/charging/brightness";
 
 char const*const LCD_FILE
@@ -105,24 +106,37 @@ set_light_backlight(struct light_device_t* dev,
 }
 
 static int
-set_light_battery(struct light_device_t* dev,
+set_speaker_light_locked(struct light_device_t* dev,
         struct light_state_t const* state)
 {
     int brightness_level;
-    int err = 0;
-
-    if (!dev)
-        return -1;
-
-    pthread_mutex_lock(&g_lock);
 
     if (is_lit(state))
-        brightness_level = LED_LIGHT_SOLID_ON;
+        brightness_level = LED_LIGHT_ON;
     else
         brightness_level = LED_LIGHT_OFF;
 
-    err = write_int(LED_FILE, brightness_level);
+    return write_int(CHARGING_LED_FILE, brightness_level);
+}
 
+static void
+handle_speaker_battery_locked(struct light_device_t* dev)
+{
+    if (is_lit(&g_notification)) {
+        set_speaker_light_locked(dev, &g_notification);
+    } else {
+        set_speaker_light_locked(dev, &g_battery);
+    }
+}
+
+static int
+set_light_battery(struct light_device_t* dev,
+        struct light_state_t const* state)
+{
+    int err = 0;
+    pthread_mutex_lock(&g_lock);
+    g_battery = *state;
+    handle_speaker_battery_locked(dev);
     pthread_mutex_unlock(&g_lock);
     return err;
 }
@@ -131,21 +145,10 @@ static int
 set_light_notifications(struct light_device_t* dev,
         struct light_state_t const* state)
 {
-    int brightness_level;
     int err = 0;
-
-    if (!dev)
-        return -1;
-
     pthread_mutex_lock(&g_lock);
-
-    if (is_lit(state))
-        brightness_level = LED_LIGHT_BLINK_FAST;
-    else
-        brightness_level = LED_LIGHT_OFF;
-
-    err = write_int(LED_FILE, brightness_level);
-
+    g_notification = *state;
+    handle_speaker_battery_locked(dev);
     pthread_mutex_unlock(&g_lock);
     return err;
 }

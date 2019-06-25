@@ -6,17 +6,15 @@
 /dev/hidraw[0-9]*                                        u:object_r:amps_raw_device:s0
 
 # Binaries
-/system/vendor/bin/adspd                                        u:object_r:adspd_exec:s0
+/system/bin/adspd                                        u:object_r:adspd_exec:s0
 /system/bin/charge_only_mode                             u:object_r:charge_only_exec:s0
-/system/vendor/bin/init\.mmi\.boot\.sh                          u:object_r:mmi_boot_exec:s0
-/system/vendor/bin/wlan_carrier_bin\.sh                         u:object_r:init_wifi_exec:s0
-/system/vendor/bin/init\.qti\.fm\.sh		u:object_r:qti_init_shell_exec:s0
-/system/vendor/bin/hw/motorola\.hardware\.camera\.provider@2\.4-service u:object_r:hal_camera_default_exec:s0
-/system/vendor/lib/motorola\.hardware\.camera\.device@1\.0.so                  u:object_r:hal_camera_default_exec:s0
-/system/vendor/lib/motorola\.hardware\.camera\.provider@2\.4.so                u:object_r:hal_camera_default_exec:s0
-
-#binder to fix camera daemon
-/dev/binder(/.*)?                                                             u:object_r:binder_device:s0
+/system/bin/hci_qcomm_init                               u:object_r:config_bluetooth_exec:s0
+/system/bin/init\.mmi\.boot\.sh                          u:object_r:mmi_boot_exec:s0
+/system/bin/init\.mmi\.touch\.sh                         u:object_r:mmi_touch_sh_exec:s0
+/system/bin/init\.oem\.hw\.sh                            u:object_r:oem-hw-sh_exec:s0
+/system/bin/wlan_carrier_bin\.sh                         u:object_r:init_wifi_exec:s0
+/system/bin/motosh                                       u:object_r:sensor_hub_exec:s0
+/system/bin/akmd09912                                    u:object_r:akmd_exec:s0
 
 # CMActions
 /sys/homebutton(/.*)?                                    u:object_r:sysfs_homebutton:s0
@@ -31,6 +29,9 @@
 
 /sys/devices/soc/7af8000.spi/spi_master/spi8/spi8.0(/.*)? u:object_r:sysfs_fpc:s0
 
+# mmi_touch related /sys files
+/sys/devices/soc/78b7000\.i2c/i2c-3/3-0020(/.*)?         u:object_r:sysfs_mmi_touch:s0
+
 # Modem
 /persist/mdm(/.*)?                                       u:object_r:persist_modem_file:s0
 
@@ -44,9 +45,9 @@
 /persist/captouch_(.*)?                                  u:object_r:persist_antcap_file:s0
 /persist/telephony(/.*)?                                 u:object_r:pds_telephony_file:s0
 /persist/public/telephony(/.*)?                          u:object_r:pds_telephony_file:s0
+/persist/batt_health(/.*)?                               u:object_r:pds_batt_file:s0
 /persist/public/omadm(/.*)?                              u:object_r:pds_omadm_file:s0
 /persist/factory/audio(/.*)?                             u:object_r:persist_audio_file:s0
-/persist/\.bt_nv\.bin                                    u:object_r:bluetooth_data_file:s0
 
 /data/wapi_certificate(/.*)?                             u:object_r:wapi_supplicant_data_file:s0
 
@@ -81,7 +82,6 @@
 /dev/stml0xx_akm                                         u:object_r:compass_device:s0
 /dev/akm09912_dev                                        u:object_r:compass_device:s0
 /dev/mot_hob_ram                                         u:object_r:hob_device:s0
-/dev/smd3                                                u:object_r:hci_attach_dev:s0
 
 
 /dev/bcm2079x-i2c                                        u:object_r:nfc_device:s0
@@ -93,7 +93,6 @@
 /dev/block/bootdevice/by-name/frp                        u:object_r:frp_block_device:s0
 /dev/block/bootdevice/by-name/hw                         u:object_r:hw_block_device:s0
 /dev/block/bootdevice/by-name/metadata                   u:object_r:metadata_block_device:s0
-/dev/block/mmcblk0p35                                    u:object_r:metadata_block_device:s0
 /dev/block/bootdevice/by-name/persist                    u:object_r:persist_block_device:s0
 /dev/block/bootdevice/by-name/utagsBackup                u:object_r:utags_block_device:s0
 /dev/block/bootdevice/by-name/utags                      u:object_r:utags_block_device:s0
@@ -117,21 +116,8 @@
 # WCNSS
 /sys/module/wcnsscore/parameters(/.*)?                   u:object_r:sysfs_wcnsscore:s0
 
-/data/misc/perfd(/.*)?                                          u:object_r:perfd_data_file:s0
-/data/system/perfd(/.*)?                                        u:object_r:perfd_data_file:s0
-/data/oemnvitems(/.*)?                                          u:object_r:nv_data_file:s0
-/data/vendor/time(/.*)?                                         u:object_r:time_data_file:s0
-
-/system/vendor/bin/perfd           u:object_r:perfd_exec:s0
-/system/vendor/bin/hw/android\.hardware\.power@1\.1-service-qti          u:object_r:hal_power_default_exec:s0
-/system/vendor/radio(/.*)? u:object_r:radio_data_file:s0
-
-/system/vendor/bin/qmi_motext_hook u:object_r:rild_exec:s0
-
-/sys/kernel/debug/rmt_storage(/.*)? u:object_r:debugfs_rmt_storage:s0
-
-/data/vendor/nfc(/.*)? u:object_r:nfc_data_file:s0
-
-# Fingerprint custom hal
-/(vendor|system/vendor)/bin/hw/android\.hardware\.biometrics\.fingerprint@2\.1-service_32 u:object_r:hal_fingerprint_default_exec:s0
-
+# Screen off gestures
+/sys/android_touch/gesture_swipe_right                   u:object_r:sysfs_screen_off_gestures:s0
+/sys/android_touch/gesture_swipe_left                    u:object_r:sysfs_screen_off_gestures:s0
+/sys/android_touch/gesture_swipe_down                    u:object_r:sysfs_screen_off_gestures:s0
+/sys/android_touch/gesture_swipe_up                      u:object_r:sysfs_screen_off_gestures:s0
